@@ -66,8 +66,8 @@ class CustomGrid(wx.grid.Grid):
             try:
                 if control and control.GetEventHandler() is not control:
                     control.PopEventHandler(False)
-            except Exception:
-                pass
+            except RuntimeError:
+                pass  # control already destroyed
         self._editor_controls = []
 
     def SetFocus(self):
