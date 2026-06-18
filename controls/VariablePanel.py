@@ -685,6 +685,9 @@ class VariablePanel(wx.Panel):
             else:
                 self.VariablesGrid.SetColSize(col, self.ColSettings["size"][col])
 
+    def CleanUpForClose(self):
+        self.VariablesGrid.CleanUpEditors()
+
     def SetTagName(self, tagname):
         self.TagName = tagname
         self.BodyType = self.Controler.GetEditedElementBodyType(self.TagName)

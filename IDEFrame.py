@@ -955,6 +955,12 @@ class IDEFrame(wx.Frame):
                 self.AUIManager.RestorePane(pane)
             self.AUIManager.Update()
 
+    def _CleanUpPageEditors(self, window):
+        if hasattr(window, 'CleanUpForClose'):
+            window.CleanUpForClose()
+        for child in window.GetChildren():
+            self._CleanUpPageEditors(child)
+
     def OnPageClose(self, event):
         """Callback function when AUINotebook Page closing with CloseButton
 
@@ -965,6 +971,7 @@ class IDEFrame(wx.Frame):
             window = self.TabsOpened.GetPage(selected)
 
             if window.CheckSaveBeforeClosing():
+                self._CleanUpPageEditors(window)
 
                 # Refresh all window elements that have changed
                 wx.CallAfter(self._Refresh, TITLE, EDITORTOOLBAR, FILEMENU, EDITMENU, DISPLAYMENU)

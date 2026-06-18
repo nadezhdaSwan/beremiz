@@ -46,9 +46,29 @@ class CustomGrid(wx.grid.Grid):
         self.SetSelectionForeground(wx.BLACK)
         self.DisableDragRowSize()
 
+        self._editor_controls = []
+
         self.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.OnSelectCell)
         self.Bind(wx.grid.EVT_GRID_EDITOR_HIDDEN, self.OnEditorHidden)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind(wx.grid.EVT_GRID_EDITOR_CREATED, self._OnEditorCreated)
+
+    def _OnEditorCreated(self, event):
+        control = event.GetControl()
+        if control is not None:
+            self._editor_controls.append(control)
+        event.Skip()
+
+    def CleanUpEditors(self):
+        if self.IsCellEditControlEnabled():
+            self.DisableCellEditControl()
+        for control in self._editor_controls:
+            try:
+                if control and control.GetEventHandler() is not control:
+                    control.PopEventHandler(False)
+            except Exception:
+                pass
+        self._editor_controls = []
 
     def SetFocus(self):
         if self:
@@ -82,9 +102,8 @@ class CustomGrid(wx.grid.Grid):
                 self.DownButton.Enable(self.Editable and 0 <= row < rows - 1)
 
     def CloseEditControl(self):
-        row, col = self.GetGridCursorRow(), self.GetGridCursorCol()
-        if row != -1 and col != -1:
-            self.SetGridCursor(row, col)
+        if self.IsCellEditControlEnabled():
+            self.DisableCellEditControl()
 
     def AddRow(self):
         self.CloseEditControl()
